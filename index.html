@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ASCII Generator</title>
+    <link href="https://fonts.googleapis.com/css?family=Michroma&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="../styles/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="inputs">
+        <form method="POST" action="/">
+          <h1 class="title"> <a href="http://localhost:8080">ASCII ART GENERATOR</a></h1>
+          <input class="text" name="textToPrint" type="text" value="" />
+          <select class="selector" name="font">
+            <option selected value="standard">Standard</option>
+            <option value="shadow">Shadow</option>
+            <option value="thinkertoy">Thinkertoy</option>
+          </select><br>
+          <input class="button" type="submit" value="Generate" /><br>
+        </form>
+      </div>
+      <div class="result">
+        <pre>{{.}}</pre>
+      </div>
+    </div>
+  </body>
+</html>
