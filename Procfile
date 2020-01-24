@@ -1,1 +1,1 @@
-web: bin/ascii-web
+web: ascii-web
