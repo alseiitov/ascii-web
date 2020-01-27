@@ -1,1 +1,1 @@
-web: ./ascii-web
+web: go run main.go
