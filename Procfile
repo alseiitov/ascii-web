@@ -1,1 +1,1 @@
-web: ascii-web
+web: ./ascii-web
