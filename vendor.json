@@ -1,0 +1,12 @@
+{
+   "comment": "",
+   "ignore": "test",
+   "package": [],
+   "rootPath": "github.com/alseiitov/ascii-web",
+   "heroku": {
+      "install": [
+         "./..."
+      ],
+      "goVersion": "go1.13"
+   }
+}
