@@ -18,27 +18,23 @@ func main() {
 	templates = template.Must(template.ParseGlob("*.html"))
 
 	http.HandleFunc("/", asciiWeb)
-	
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	port = ":" + port
 
 	fmt.Printf("Starting server...\n")
-	if err := http.ListenAndServe(port, nil); err != nil {
+	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
 }
 
 func asciiWeb(w http.ResponseWriter, r *http.Request) {
+	indexLogo := "\n\n\n\n            @@@@@@@@@.    &@@@@@@@@@@ \n       &@@@@@@@@@@@@@@@@@@&@@@@@@@@@@ \n     @@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@ \n   @@@@@@@@@@@@@@@@@@@@@@@    @@@@@@@ \n  @@@@@@@@@@@@@@@@@@@@@@@@     @@@@@@ \n  @@@@@@@@@@@@@@@@@@@@@@@@     *@@@@@ \n  @@@@@@@@@@@@@@@@@@@@@@@@      @@@@@ \n  @@@@@@@@@@@@@@@@@@@@@@@@     @@@@@@ \n   @@@@@@@@@@@@@@@@@@@@@@@    *@@@@@@ \n    @@@@@@@@@@@@@@@@@@@@@@   @@@@@@@@ \n      @@@@@@@@@@@@@@@@@@@@ @@@@@@@@@@ \n         #@@@@@@@@@@@@@@  &@@@@@@@@@@ "
+
 	if r.URL.Path != "/" {
 		http.Error(w, "404 not found.", http.StatusNotFound)
 		return
 	}
 	switch r.Method {
 	case "GET":
-		if err := templates.ExecuteTemplate(w, "index.html", "HELLO"); err != nil {
+		if err := templates.ExecuteTemplate(w, "index.html", indexLogo); err != nil {
 			http.Error(w, "500 internal server error.", http.StatusInternalServerError)
 		}
 
