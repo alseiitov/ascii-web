@@ -19,6 +19,12 @@ func main() {
 
 	http.HandleFunc("/", asciiWeb)
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	port = ":" + port
+
 	fmt.Printf("Starting server...\n")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
