@@ -33,8 +33,13 @@ func main() {
 
 	http.HandleFunc("/", asciiWeb)
 
-	fmt.Printf("Listening server at port 8080\n")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	fmt.Printf("Listening server at port %v\n", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal(err)
 	}
 }
