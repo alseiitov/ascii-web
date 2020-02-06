@@ -4,94 +4,108 @@ import (
 	"bufio"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 var templates *template.Template
+var indexLogo []byte
+var fonts struct {
+	Standard   []string
+	Shadow     []string
+	Thinkertoy []string
+}
 
 func main() {
-	fs := http.FileServer(http.Dir("styles"))
+	fs := http.FileServer(http.Dir("styles")) //Serving static files
 	http.Handle("/styles/", http.StripPrefix("/styles/", fs))
+
+	indexLogo, _ = ioutil.ReadFile("./styles/indexlogo.txt") // Alem logo on index page
 
 	templates = template.Must(template.ParseGlob("*.html"))
 
+	fonts.Standard = readToMemory("standard")
+	fonts.Shadow = readToMemory("shadow")
+	fonts.Thinkertoy = readToMemory("thinkertoy")
+
 	http.HandleFunc("/", asciiWeb)
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	port = ":" + port
-
-	fmt.Printf("Starting server...\n")
-	if err := http.ListenAndServe(port, nil); err != nil {
+	fmt.Printf("Listening server at port 8080\n")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
 }
 
 func asciiWeb(w http.ResponseWriter, r *http.Request) {
-	indexLogo := "\n\n\n\n            @@@@@@@@@.    &@@@@@@@@@@ \n       &@@@@@@@@@@@@@@@@@@&@@@@@@@@@@ \n     @@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@ \n   @@@@@@@@@@@@@@@@@@@@@@@    @@@@@@@ \n  @@@@@@@@@@@@@@@@@@@@@@@@     @@@@@@ \n  @@@@@@@@@@@@@@@@@@@@@@@@     *@@@@@ \n  @@@@@@@@@@@@@@@@@@@@@@@@      @@@@@ \n  @@@@@@@@@@@@@@@@@@@@@@@@     @@@@@@ \n   @@@@@@@@@@@@@@@@@@@@@@@    *@@@@@@ \n    @@@@@@@@@@@@@@@@@@@@@@   @@@@@@@@ \n      @@@@@@@@@@@@@@@@@@@@ @@@@@@@@@@ \n         #@@@@@@@@@@@@@@  &@@@@@@@@@@ "
-
+	//Not found status handler
 	if r.URL.Path != "/" {
 		http.Error(w, "404 not found.", http.StatusNotFound)
 		return
 	}
+	//Request methods handler
 	switch r.Method {
 	case "GET":
-		if err := templates.ExecuteTemplate(w, "index.html", indexLogo); err != nil {
+		if err := templates.ExecuteTemplate(w, "index.html", string(indexLogo)); err != nil {
 			http.Error(w, "500 internal server error.", http.StatusInternalServerError)
 		}
-
 	case "POST":
-		var lines []string
-		word := r.FormValue("textToPrint")
+		//Parsing user input and font from request
+		input := r.FormValue("textToPrint")
 		font := r.FormValue("font")
-		file, err := os.Open("fonts/" + font + ".txt")
-		if err != nil {
-			http.Error(w, "500 internal server error.", http.StatusInternalServerError)
-			return
-		}
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			lines = append(lines, scanner.Text())
-		}
-		file.Close()
-		result := generator(word, lines)
 
+		//Writing art to template
+		result := generator(input, font)
 		if err := templates.ExecuteTemplate(w, "index.html", result); err != nil {
 			http.Error(w, "500 internal server error.", http.StatusInternalServerError)
 		}
-
 	default:
 		fmt.Fprintf(w, "Sorry, only GET and POST methods are supported.")
 	}
 }
 
-func generator(word string, lines []string) string {
-	res := ""
-	num := 0
-	var newLine bool
-	for i := 0; i < 8; i++ {
-		for iWord, sWord := range word {
-			if word[iWord] == '\\' && iWord+1 < len(word) {
-				if word[iWord+1] == 'n' {
-					num = iWord
-					newLine = true
-					break
-				}
-			}
-			for iSym := 32; iSym <= 126; iSym++ {
-				if sWord == rune(iSym) {
-					res = res + lines[(iSym-32)*8+i]
-				}
-			}
-		}
-		res = res + "\n"
+//ASCII art generator
+func generator(input, font string) string {
+	var lines []string
+	var res string
+
+	switch font {
+	case "standard":
+		lines = fonts.Standard
+	case "shadow":
+		lines = fonts.Shadow
+	case "thinkertoy":
+		lines = fonts.Thinkertoy
 	}
-	if newLine == true {
-		res = res + generator(word[num+2:len(word)], lines)
+
+	words := strings.Split(input, "\\n")
+	for _, word := range words {
+		for i := 0; i < 8; i++ {
+			for _, char := range word {
+				if char > 31 && char < 127 {
+					res = res + lines[(int(char)-32)*8+i]
+				}
+			}
+			res += "\n"
+		}
 	}
 	return res
+}
+
+//Read fonts to memory
+func readToMemory(font string) []string {
+	var lines []string
+	file, err := os.Open("fonts/" + font + ".txt")
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(0)
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	return lines
 }
