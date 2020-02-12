@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 )
@@ -21,7 +22,9 @@ var fonts struct {
 
 func main() {
 	fs := http.FileServer(http.Dir("styles")) //Serving static files
+	// downloadDir := http.FileServer(http.Dir("download"))
 	http.Handle("/styles/", http.StripPrefix("/styles/", fs))
+	http.Handle("/download/", http.StripPrefix("/download/", fs))
 
 	indexLogo, _ = ioutil.ReadFile("./styles/indexlogo.txt") // Alem logo on index page
 
@@ -33,13 +36,8 @@ func main() {
 
 	http.HandleFunc("/", asciiWeb)
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	fmt.Printf("Listening server at port %v\n", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	fmt.Printf("Listening server at port 8080\n")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -57,12 +55,46 @@ func asciiWeb(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "500 internal server error.", http.StatusInternalServerError)
 		}
 	case "POST":
-		//Parsing user input and font from request
-		input := r.FormValue("textToPrint")
-		font := r.FormValue("font")
+		var input string
+		var font string
+
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		query, err := url.ParseQuery(string(body))
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+
+		for i, v := range query {
+			switch i {
+			case "textToPrint":
+				input = v[0]
+			case "font":
+				font = v[0]
+			default:
+				http.Error(w, "400 Bad request", 400)
+				return
+			}
+		}
+
+		if font != "standard" && font != "shadow" && font != "thinkertoy" {
+			http.Error(w, "400 Bad request", 400)
+			return
+		}
 
 		//Writing art to template
 		result := generator(input, font)
+		file, err := os.Create("./download/art.pdf")
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		_, err = file.Write([]byte(result))
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		file.Close()
 		if err := templates.ExecuteTemplate(w, "index.html", result); err != nil {
 			http.Error(w, "500 internal server error.", http.StatusInternalServerError)
 		}
