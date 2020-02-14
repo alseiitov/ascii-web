@@ -28,25 +28,31 @@ var Send struct {
 }
 
 func main() {
+	//Static files server and handler
 	fs := http.FileServer(http.Dir("styles"))
-
 	http.Handle("/styles/", http.StripPrefix("/styles/", fs))
-	http.Handle("/download/", http.StripPrefix("/download/", fs))
 
-	indexLogo, _ = ioutil.ReadFile("./styles/indexlogo.txt") // Alem logo on index page
+	// Alem logo on index page
+	indexLogo, _ = ioutil.ReadFile("./styles/indexlogo.txt")
 
+	//Parse temp;ates
 	templates = template.Must(template.ParseGlob("*.html"))
 
+	//Read font files to memory
 	fonts.Standard = readToMemory("standard")
 	fonts.Shadow = readToMemory("shadow")
 	fonts.Thinkertoy = readToMemory("thinkertoy")
 
+	//Main handler
 	http.HandleFunc("/", asciiWeb)
 
+	//Handle custom PORT
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
+
+	//Start server
 	fmt.Printf("Listening server at port %v\n", port)
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
@@ -73,7 +79,7 @@ func asciiWeb(w http.ResponseWriter, r *http.Request) {
 		var input string
 		var font string
 		var genOrDown string
-
+		// Parse request
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -82,7 +88,7 @@ func asciiWeb(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println(err.Error())
 		}
-
+		//Check request for invalid keys
 		for i, v := range query {
 			switch i {
 			case "textToPrint":
@@ -96,12 +102,13 @@ func asciiWeb(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-
+		//Check request for invalid keys #2
 		if font != "standard" && font != "shadow" && font != "thinkertoy" {
 			http.Error(w, "400 Bad request", 400)
 			return
 		}
-		art := generator(input, font)
+		art := generator(input, font) //Generate art
+		//Generate and send or serve to download
 		switch genOrDown {
 		case "generate":
 			//Writing art to template
@@ -112,6 +119,7 @@ func asciiWeb(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "500 internal server error.", http.StatusInternalServerError)
 			}
 		case "download":
+			//Serving to download
 			file := strings.NewReader(art)
 			fileSize := strconv.FormatInt(file.Size(), 10)
 			w.Header().Set("Content-Disposition", "attachment; filename=art.txt")
@@ -120,7 +128,6 @@ func asciiWeb(w http.ResponseWriter, r *http.Request) {
 			file.Seek(0, 0)
 			io.Copy(w, file)
 		}
-
 	default:
 		fmt.Fprintf(w, "Sorry, only GET and POST methods are supported.")
 	}
