@@ -100,6 +100,10 @@ body {
   scrollbar-width: thin;
 }
 
+#genOrDown {
+  display: none;
+}
+
 @media screen and (max-width: 1200px) {
   .container {
     width: 300px;

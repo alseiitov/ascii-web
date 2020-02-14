@@ -10,18 +10,24 @@
       <div class="inputs">
         <form method="POST" action="/">
           <h1 class="title"> <a href="https://ascii-web.herokuapp.com/">ASCII ART GENERATOR</a></h1>
-          <input class="text" name="textToPrint" type="text" value="" />
+          <input class="text" name="textToPrint" type="text" value="{{.Input}}" />
           <select class="selector" name="font">
             <option selected value="standard">Standard</option>
             <option value="shadow">Shadow</option>
             <option value="thinkertoy">Thinkertoy</option>
           </select><br>
-          <input class="button" type="submit" value="Generate" /><br>
+          <input class="button" type="submit" value="Generate" id="gen" />
+          <input class="button" type="submit" value="Download" id="down"/><br>
+          <select class="selector" name="genOrDown" id="genOrDown">
+            <option value="generate"></option>
+            <option value="download"></option>
+          </select><br>
         </form>
       </div>
       <div class="result">
-        <pre>{{.}}</pre>
+        <pre>{{.Result}}</pre>
       </div>
     </div>
+    <script src="../styles/index.js"></script>
   </body>
 </html>

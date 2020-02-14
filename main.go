@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"html/template"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -19,10 +21,15 @@ var fonts struct {
 	Shadow     []string
 	Thinkertoy []string
 }
+var Send struct {
+	Input  string
+	Font   string
+	Result string
+}
 
 func main() {
-	fs := http.FileServer(http.Dir("styles")) //Serving static files
-	// downloadDir := http.FileServer(http.Dir("download"))
+	fs := http.FileServer(http.Dir("styles"))
+
 	http.Handle("/styles/", http.StripPrefix("/styles/", fs))
 	http.Handle("/download/", http.StripPrefix("/download/", fs))
 
@@ -36,8 +43,13 @@ func main() {
 
 	http.HandleFunc("/", asciiWeb)
 
-	fmt.Printf("Listening server at port 8080\n")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	fmt.Printf("Listening server at port %v\n", port)
+	err := http.ListenAndServe(":"+port, nil)
+	if err != nil {
 		log.Fatal(err)
 	}
 }
@@ -51,12 +63,16 @@ func asciiWeb(w http.ResponseWriter, r *http.Request) {
 	//Request methods handler
 	switch r.Method {
 	case "GET":
-		if err := templates.ExecuteTemplate(w, "index.html", string(indexLogo)); err != nil {
+		Send.Input = ""
+		Send.Font = "standard"
+		Send.Result = string(indexLogo)
+		if err := templates.ExecuteTemplate(w, "index.html", Send); err != nil {
 			http.Error(w, "500 internal server error.", http.StatusInternalServerError)
 		}
 	case "POST":
 		var input string
 		var font string
+		var genOrDown string
 
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -73,6 +89,8 @@ func asciiWeb(w http.ResponseWriter, r *http.Request) {
 				input = v[0]
 			case "font":
 				font = v[0]
+			case "genOrDown":
+				genOrDown = v[0]
 			default:
 				http.Error(w, "400 Bad request", 400)
 				return
@@ -83,21 +101,26 @@ func asciiWeb(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "400 Bad request", 400)
 			return
 		}
+		art := generator(input, font)
+		switch genOrDown {
+		case "generate":
+			//Writing art to template
+			Send.Input = input
+			Send.Font = font
+			Send.Result = art
+			if err := templates.ExecuteTemplate(w, "index.html", Send); err != nil {
+				http.Error(w, "500 internal server error.", http.StatusInternalServerError)
+			}
+		case "download":
+			file := strings.NewReader(art)
+			fileSize := strconv.FormatInt(file.Size(), 10)
+			w.Header().Set("Content-Disposition", "attachment; filename=art.txt")
+			w.Header().Set("Content-Type", "text/plain")
+			w.Header().Set("Content-Length", fileSize)
+			file.Seek(0, 0)
+			io.Copy(w, file)
+		}
 
-		//Writing art to template
-		result := generator(input, font)
-		file, err := os.Create("./download/art.pdf")
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		_, err = file.Write([]byte(result))
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		file.Close()
-		if err := templates.ExecuteTemplate(w, "index.html", result); err != nil {
-			http.Error(w, "500 internal server error.", http.StatusInternalServerError)
-		}
 	default:
 		fmt.Fprintf(w, "Sorry, only GET and POST methods are supported.")
 	}
