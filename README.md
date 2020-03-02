@@ -1,13 +1,15 @@
 # ASCII-ART Generator
 
+Link: http://ascii-web.herokuapp.com
+
 Online [tool](http://ascii-web.herokuapp.com/) to create and download ASCII art from text using 3 different fonts.
 
-Front-end:
+**Front-end:**
   - HTML
   - CSS
   - JS
 
-Back-end:
+**Back-end:**
  - Golang
  - Docker
 
@@ -21,4 +23,4 @@ Or
 $ go build
 $ ./ascii-web
 ```
-and open [http://localhost:8080](http://localhost:8080/) in your browser.
+and open [http://localhost:8080](http://localhost:8080/) in your browser.#
