@@ -1,0 +1,145 @@
+*{
+  margin: 0px 0px 0px 0px;
+}
+
+a {
+  text-decoration: none;
+  color: #292939;
+}
+
+body {
+  background: #292939;
+  justify-content: center;
+  color: #292939;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Nova Square', cursive;
+}
+
+.container {
+  margin: 0;
+  width: 1000px;
+  background: #f2f2e6;
+  border-radius: 15px;
+  padding: 20px;
+}
+
+.title {
+  padding-top: 30px;
+  margin-bottom: 30px;
+  font-size: 50px;
+}
+
+.inputs {
+  text-align: center;
+  font-size: 25px;
+  margin-bottom: 50px;
+}
+
+.text {
+  background-color: #f2f2e6;
+  color: #292939;
+  border-radius: 5px;
+  border: 1px solid #292939;
+  font-family: 'Nova Square', cursive;
+  font-size: 20px;
+  width: 300px;
+  height: 26px;
+}
+
+.selector {
+  background: url("down.svg") no-repeat 95% center;
+  background-size: 10px 10px;
+  background-color: #f2f2e6;
+  color: #292939;
+  border-radius: 5px;
+  border: 1px solid #292939;
+  margin-left: 20px;
+  -webkit-appearance: none;
+  outline: none;
+  font-family: 'Nova Square', cursive;
+  width: 170px;
+  height: 30px;
+  font-size: 20px;
+  transition: 0.3s;
+}
+
+.selector:hover {
+  background-color: #292939;
+  color: #f2f2e6;
+}
+
+.button {
+  background-color: #f2f2e6;
+  color: #292939;
+  border-radius: 5px;
+  border: 1px solid #292939;
+  margin-top: 20px;
+  font-family: 'Nova Square', cursive;
+  font-size: 20px;
+  width: 150px;
+  height: 35px;
+  transition: 0.3s;
+}
+
+.button:hover {
+  background-color: #292939;
+  color: #f2f2e6;
+}
+
+.result {
+  overflow: auto;
+  height: 500px;
+  
+  text-align: center;
+  font-size: 20px;
+  font-weight: 900;
+  scrollbar-color: rgb(66, 68, 85) rgb(168, 162, 156);
+  scrollbar-width: thin;
+}
+
+#genOrDown {
+  display: none;
+}
+
+@media screen and (max-width: 1200px) {
+  .container {
+    width: 300px;
+    height: 500px;
+    padding: 10px;
+  }
+  .title {
+    padding-top: 10px;
+    font-size: 20px;
+    margin-bottom: 5px;
+    
+  }
+  .text {
+    margin-bottom: 0px;
+    width: 200px;
+    font-size: 10px;
+    width: 200px;
+    height: 20px;
+  }
+  .selector {
+    padding-left: 5px;
+    margin-left: 0px;
+    font-size: 15px;
+    width: 100px;
+    height: 20px;
+    font-size: 10px;
+  }
+  .button {
+    font-size: 15px;
+    width: 100px;
+    height: 20px;
+    font-size: 10px;
+    margin-top: 10px;
+  }
+  .result {
+    font-size: 10px;
+    height: 310px;
+  }
+}

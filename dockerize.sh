@@ -9,6 +9,3 @@ docker images
 echo
 echo "### Containers list"
 docker container ls
-echo
-echo "### Commandline in container"
-docker exec -it web /bin/sh

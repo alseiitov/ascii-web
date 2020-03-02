@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>ASCII Generator</title>
+  <link href="https://fonts.googleapis.com/css?family=Nova+Square&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../static/style.css" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="inputs">
+      <form method="POST" action="/">
+        <h1 class="title"> <a href="/">ASCII ART GENERATOR</a></h1>
+        <input class="text" name="textToPrint" type="text" value="{{.Input}}" />
+        <select class="selector" name="font">
+          <option selected value="standard">Standard</option>
+          <option value="shadow">Shadow</option>
+          <option value="thinkertoy">Thinkertoy</option>
+        </select><br>
+        <input class="button" type="submit" value="Generate" id="gen" />
+        <input class="button" type="submit" value="Download" id="down" /><br>
+        <select class="selector" name="genOrDown" id="genOrDown">
+          <option value="generate"></option>
+          <option value="download"></option>
+        </select><br>
+      </form>
+    </div>
+    <div class="result">
+      <pre>{{.Result}}</pre>
+    </div>
+  </div>
+  <script src="../static/index.js"></script>
+</body>
+
+</html>
